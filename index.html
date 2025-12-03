@@ -1,144 +1,33 @@
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Accelerometer Data (ESP8266 → HiveMQ Cloud)</title>
+  <title>KELOMPOK 5</title>
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f7f7f7;
-      padding: 20px;
-    }
-    canvas {
-      max-width: 800px;
-      margin: 20px auto;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
-    }
-  </style>
 </head>
 <body>
-  <h2>Accelerometer Data (ESP8266 → HiveMQ Cloud)</h2>
-  <canvas id="accChart"></canvas>
+  <header>
+    <h2>KELOMPOK 5</h2>
+    <h2>PENDETEKSI DINI GEMPA DI PESISIR</h2>
+    <div class="status" id="status">🔴 Disconnected</div>
+    <button class="theme-toggle" onclick="toggleTheme()">Switch Theme</button>
+  </header>
 
-  <script>
-    // -----------------------------
-    // 1. KONFIGURASI BROKER HiveMQ
-    // -----------------------------
-    const brokerUrl = "wss://1986e0a1ee9641559011881482ca913b.s1.eu.hivemq.cloud:8884/mqtt";
-    const options = {
-      username: "PRK_5",  // ganti dengan username HiveMQ
-      password: "Gempabumi5",  // ganti dengan password HiveMQ
-      clean: true,
-      connectTimeout: 4000,
-      reconnectPeriod: 1000
-    };
+  <main>
+    <div class="card">
+      <canvas id="accChart"></canvas>
+      <div class="values">
+	<div class="val-g">Getaran: <span id="valG">0</span> m/s²</div>
+      </div>
+<div id="alertBox" class="alert hidden">
+  <span id="alertText">Status: ???</span>
+</div>
+    </div>
+  </main>
 
-
-    // -----------------------------
-    // 2. INISIALISASI MQTT CLIENT
-    // -----------------------------
-    const client = mqtt.connect(brokerUrl, options);
-
-    client.on("connect", () => {
-      console.log("Terhubung ke HiveMQ Cloud!");
-      client.subscribe("mpu6050/data", (err) => {
-        if (!err) {
-          console.log("Subscribe ke topic mpu6050/data berhasil");
-        }
-      });
-    });
-
-    client.on("error", (err) => {
-      console.error("Koneksi gagal:", err);
-    });
-
-    // -----------------------------
-    // 3. INISIALISASI CHART.JS
-    // -----------------------------
-    const ctx = document.getElementById("accChart").getContext("2d");
-    const accChart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: [],
-        datasets: [
-          {
-            label: "X",
-            borderColor: "red",
-            fill: false,
-            data: []
-          },
-          {
-            label: "Y",
-            borderColor: "blue",
-            fill: false,
-            data: []
-          },
-          {
-            label: "Z",
-            borderColor: "green",
-            fill: false,
-            data: []
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        animation: false,
-        scales: {
-          x: {
-            title: {
-              display: true,
-              text: "Sample"
-            }
-          },
-          y: {
-            title: {
-              display: true,
-              text: "Acceleration (g)"
-            }
-          }
-        }
-      }
-    });
-
-    // -----------------------------
-    // 4. MENERIMA DATA DARI MQTT
-    // -----------------------------
-    client.on("message", (topic, message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        console.log("Data diterima:", data);
-
-        // Tambahkan label sample (misalnya urutan data)
-        accChart.data.labels.push(accChart.data.labels.length + 1);
-
-        // Tambahkan data X, Y, Z
-        accChart.data.datasets[0].data.push(data.x);
-        accChart.data.datasets[1].data.push(data.y);
-        accChart.data.datasets[2].data.push(data.z);
-
-        // Batasi data max 20 titik agar grafik tidak terlalu panjang
-        if (accChart.data.labels.length > 20) {
-          accChart.data.labels.shift();
-          accChart.data.datasets.forEach(dataset => dataset.data.shift());
-        }
-
-        // Update chart
-        accChart.update();
-      } catch (e) {
-        console.error("Error parsing message:", e);
-      }
-    });
-  </script>
+  <script src="app.js"></script>
 </body>
-</html>
+</html> 
+
